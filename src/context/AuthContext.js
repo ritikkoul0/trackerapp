@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import config from '../config';
 
 const AuthContext = createContext(null);
 
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('https://trackerbackend-ao16.onrender.com/me', {
+      const response = await fetch(`${config.API_URL}/me`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8080/logout', {
+      await fetch(`${config.API_URL}/logout`, {
         method: 'POST',
         credentials: 'include'
       });
