@@ -1,12 +1,20 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import config from '../config';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkAuthStatus();
@@ -15,13 +23,18 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const response = await fetch(`${config.API_URL}/me`, {
-        credentials: 'include'
+        credentials: 'include' // CRITICAL: Include cookies for authentication
       });
-      const data = await response.json();
       
-      if (data.loggedIn) {
-        setUser({ email: data.email, userId: data.user_id });
-        setIsAuthenticated(true);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.loggedIn && data.user) {
+          setUser(data.user);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       } else {
         setUser(null);
         setIsAuthenticated(false);
@@ -39,35 +52,30 @@ export const AuthProvider = ({ children }) => {
     try {
       await fetch(`${config.API_URL}/logout`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include' // CRITICAL: Include cookies for logout
       });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
       setUser(null);
       setIsAuthenticated(false);
       window.location.href = '/login';
-    } catch (error) {
-      console.error('Logout failed:', error);
     }
   };
 
   const value = {
     user,
-    loading,
     isAuthenticated,
-    checkAuthStatus,
-    logout
+    loading,
+    logout,
+    checkAuthStatus
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export default AuthContext;
-
-
+// Made with Bob
