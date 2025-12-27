@@ -1,41 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import config from '../config';
 import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [checking, setChecking] = useState(true);
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    // Check if user is already logged in
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch(`${config.API_URL}/me`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      
-      if (data.loggedIn) {
-        // User is already logged in, redirect to dashboard
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    } finally {
-      setChecking(false);
+    // If user is already authenticated, redirect to dashboard
+    if (!loading && isAuthenticated) {
+      navigate('/dashboard');
     }
-  };
+  }, [isAuthenticated, loading, navigate]);
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth endpoint
     window.location.href = `${config.API_URL}/sso`;
   };
 
-  if (checking) {
+  if (loading) {
     return (
       <div className="login-container">
         <div className="login-card">
