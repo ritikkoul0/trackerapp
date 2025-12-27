@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 import './Login.css';
 
 const Login = () => {
@@ -13,7 +14,7 @@ const Login = () => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('https://trackerbackend-ao16.onrender.com/me', {
+      const response = await fetch(`${config.API_URL}/me`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -31,7 +32,7 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = 'https://trackerbackend-ao16.onrender.com/sso';
+    window.location.href = `${config.API_URL}/sso`;
   };
 
   if (checking) {
