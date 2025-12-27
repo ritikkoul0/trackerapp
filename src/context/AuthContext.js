@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8080/me', {
+      const response = await fetch('https://trackerbackend-ao16.onrender.com/me', {
         credentials: 'include'
       });
       const data = await response.json();
