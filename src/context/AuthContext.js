@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import config from '../config';
 
 const AuthContext = createContext();
@@ -16,11 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch(`${config.API_URL}/me`, {
         credentials: 'include' // CRITICAL: Include cookies for authentication
@@ -46,9 +42,13 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
+
+  const logout = useCallback(async () => {
     try {
       await fetch(`${config.API_URL}/logout`, {
         method: 'POST',
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       window.location.href = '/login';
     }
-  };
+  }, []);
 
   const value = {
     user,
@@ -78,4 +78,3 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Made with Bob
