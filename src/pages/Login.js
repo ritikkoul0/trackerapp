@@ -13,7 +13,7 @@ const Login = () => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8080/me', {
+      const response = await fetch('https://trackerbackend-ao16.onrender.com/me', {
         credentials: 'include'
       });
       const data = await response.json();
@@ -31,7 +31,7 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = 'http://localhost:8080/sso';
+    window.location.href = 'https://trackerbackend-ao16.onrender.com/sso';
   };
 
   if (checking) {
