@@ -24,8 +24,12 @@ export const AuthProvider = ({ children }) => {
       
       if (response.ok) {
         const data = await response.json();
-        if (data.loggedIn && data.user) {
-          setUser(data.user);
+        if (data.loggedIn) {
+          // Backend returns email and user_id directly in response
+          setUser({
+            email: data.email,
+            user_id: data.user_id
+          });
           setIsAuthenticated(true);
         } else {
           setUser(null);
