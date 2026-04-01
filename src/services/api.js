@@ -82,9 +82,10 @@ export const userAPI = {
   updateFinancials: (id, data) => apiCall(`/users/${id}/financials`, 'PUT', data),
 };
 
-// Dashboard API call
+// Dashboard API calls
 export const dashboardAPI = {
   getSummary: () => apiCall('/dashboard'),
+  getMonthlyData: () => apiCall('/dashboard/monthly'),
 };
 
 // Health check

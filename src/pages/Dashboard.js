@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { dashboardAPI, userAPI } from '../services/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
 
 // Utility function to format numbers in Indian system (Lakhs/Crores)
@@ -28,6 +29,7 @@ const Dashboard = () => {
     goals: [],
     recent_expenses: []
   });
+  const [monthlyData, setMonthlyData] = useState([]);
   const [editMode, setEditMode] = useState({
     income: false,
     expenses: false,
@@ -42,6 +44,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     fetchUserFinancials();
+    fetchMonthlyData();
   }, []);
 
   const fetchUserFinancials = async () => {
@@ -83,6 +86,27 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchMonthlyData = async () => {
+    try {
+      const data = await dashboardAPI.getMonthlyData();
+      // Format month names for better display
+      const formattedData = data.map(item => ({
+        ...item,
+        monthName: formatMonthName(item.month)
+      }));
+      setMonthlyData(formattedData);
+    } catch (err) {
+      console.error('Failed to fetch monthly data:', err);
+    }
+  };
+
+  const formatMonthName = (monthStr) => {
+    // Convert "2024-01" to "Jan 2024"
+    const [year, month] = monthStr.split('-');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
   const handleEdit = (field) => {
@@ -291,6 +315,52 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {monthlyData.length > 0 && (
+        <div className="charts-section">
+          <div className="section-header">
+            <h2>📊 Monthly Financial Overview</h2>
+          </div>
+          
+          <div className="charts-grid">
+            <div className="chart-card">
+              <h3>Monthly Savings & Expenses</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="monthName" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value) => `₹${value.toLocaleString()}`}
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="savings" fill="#3b82f6" name="Savings" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="expenses" fill="#f59e0b" name="Expenses" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card">
+              <h3>Monthly Income vs Expenses</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="monthName" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value) => `₹${value.toLocaleString()}`}
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="income" fill="#10b981" name="Income" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="expenses" fill="#ef4444" name="Expenses" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
